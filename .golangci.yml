@@ -1,0 +1,46 @@
+---
+run:
+  timeout: 1m
+  build-tags:
+    - githooks
+
+linters-settings:
+  govet:
+    enable-all: true
+    disable:
+      - shadow
+      - fieldalignment
+  gocyclo:
+    min-complexity: 15
+  goconst:
+    min-len: 3
+    min-occurrences: 4
+  godox:
+    keywords:
+      - FIXME
+  misspell:
+    locale: US
+  testifylint:
+    disable:
+      - require-error
+
+linters:
+  enable:
+    # default
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    # additional
+    - asciicheck
+    - errname
+    - gochecknoinits
+    - gocritic
+    - gocyclo
+    - godox
+    - gofmt
+    - goimports
+    - misspell
+    - testifylint

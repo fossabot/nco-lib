@@ -1,0 +1,56 @@
+---
+name: PR check code
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+
+  lint:
+    uses: ./.github/workflows/lint.yml
+
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      tdsclient: ${{ steps.filter.outputs.tdsclient }}
+
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            tdsclient:
+              - 'internal/tdsclient/**'
+
+  test-unit:
+    uses: ./.github/workflows/test-unit.yml
+
+  test-integration:
+    needs: changes
+    if: ${{ needs.changes.outputs.tdsclient == 'true' }}
+    uses: ./.github/workflows/test-integration.yml
+    secrets:
+      TESTING_SSH_USER: ${{ secrets.TESTING_SSH_USER }}
+      TESTING_SSH_KEY: ${{ secrets.TESTING_SSH_KEY }}
+      TESTING_SSH_HOST: ${{ secrets.TESTING_SSH_HOST }}
+
+  test-publish-results:
+    uses: ./.github/workflows/test-publish-gh.yml
+    needs:
+      - lint
+      - test-unit
+      - test-integration
+    if: ${{ always() }}
+
+  test-publish-sonar:
+    uses: ./.github/workflows/test-publish-sonar.yml
+    needs:
+      - lint
+      - test-unit
+      - test-integration
+    if: ${{ always() }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

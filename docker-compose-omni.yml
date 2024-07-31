@@ -1,0 +1,77 @@
+version: '3.5'
+
+x-logging:
+  &default-logging
+  driver: "json-file"
+  options:
+      max-size: "2000k"
+      max-file: "10"
+
+services:
+  omnibus0:
+    image: nco-objectserver:${VERSION:-0.1.0}
+    restart: unless-stopped
+    environment:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      # uncomment if some initial data needed
+      # DBINIT_EXTRA: "-systemfile /initdb.d/system.sql 
+      #   -applicationfile /initdb.d/application.sql 
+      #   -alertsdata -alertsdatafile /initdb.d/alertsdata.sql 
+      #   -desktopfile /initdb.d/desktop.sql 
+      #   -automationfile /initdb.d/automation.sql 
+      #   -securityfile /initdb.d/security.sql"
+      OBJSRV_EXTRA: "-nrestosenable TRUE -nhttpd_enablehttp
+        -nhttpd_hostname 0.0.0.0 -nhttpd_port 8080"
+    expose:
+      - "4100"
+      - "8080"
+    ports:
+      - "4100:4100"
+      - "4080:8080"
+    volumes:
+      # uncomment if some initial data needed
+      # - ./initdb.d:/initdb.d:ro
+      - omni_data0:/db
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: "2G"
+
+  omnibus1:
+    image: nco-objectserver:${VERSION:-0.1.0}
+    restart: unless-stopped
+    environment:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      # uncomment if some initial data needed
+      # DBINIT_EXTRA: "-systemfile /initdb.d/system.sql 
+      #   -applicationfile /initdb.d/application.sql 
+      #   -alertsdata -alertsdatafile /initdb.d/alertsdata.sql 127.0.0.15
+      #   -desktopfile /initdb.d/desktop.sql 
+      #   -automationfile /initdb.d/automation.sql 
+      #   -securityfile /initdb.d/security.sql"
+      OBJSRV_EXTRA: "-nrestosenable TRUE -nhttpd_enablehttp
+        -nhttpd_hostname 0.0.0.0 -nhttpd_port 8080"
+    expose:
+      - "4100"
+      - "8080"
+    ports:
+      - "4101:4100"
+      - "4081:8080"
+    volumes:
+      # uncomment if some initial data needed
+      # - ./initdb.d:/initdb.d:ro
+      - omni_data1:/db
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: "2G"
+
+volumes:
+  omni_data0:
+  omni_data1:

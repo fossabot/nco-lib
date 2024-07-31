@@ -1,0 +1,93 @@
+---
+name: Run integration tests
+
+on:
+  workflow_call:
+    secrets:
+      TESTING_SSH_USER:
+        required: true
+      TESTING_SSH_KEY:
+        required: true
+      TESTING_SSH_HOST:
+        required: true
+
+jobs:
+  test-integration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/testing.key
+          chmod 600 ~/.ssh/testing.key
+          cat >>~/.ssh/config <<EOF
+          Host testing
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/testing.key
+            StrictHostKeyChecking no
+          EOF
+        env:
+          SSH_USER: ${{ secrets.TESTING_SSH_USER }}
+          SSH_KEY: ${{ secrets.TESTING_SSH_KEY }}
+          SSH_HOST: ${{ secrets.TESTING_SSH_HOST }}
+
+      - name: Generate temp dir name
+        run: |
+          echo TEMP_DIR=$(mktemp -u) >> $GITHUB_ENV
+
+      - name: Clone sources
+        run: |
+          tar cz --exclude=.git . | ssh testing "mkdir -p $TEMP_DIR && tar xz -C $TEMP_DIR"
+
+      - name: Run testing OMNIbus
+        run: |
+          ssh testing << EOF
+            cd $TEMP_DIR
+            echo -n TESTOMNI= > .env
+            echo "alter user 'root' set password 'testing';" > security.sql
+            echo "go" >> security.sql
+            docker run -e DBINIT_EXTRA="-securityfile /app/security.sql" -v \$(pwd):/app -d ${{ vars.TESTING_OMNIBUS_IMAGE }} >> .env
+            test $? -eq 0 || exit 1
+            source .env
+            container_ip=\$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \$TESTOMNI)
+            echo export TESTTDSCLIENT_ADDRESS=\$container_ip:4100 >> .env
+            echo export TESTTDSCLIENT_USER=root >> .env
+            echo export TESTTDSCLIENT_PASSWORD=testing >> .env
+            cat .env
+          EOF
+
+      - name: Run integration tests
+        run: |
+          ssh testing << EOF
+            cd $TEMP_DIR
+            test -e ~/.profile && source ~/.profile
+            test -e .env && source .env
+            make setup-tools
+            CGO_ENABLED=1 make test-int
+          EOF
+
+      - name: Fetch coverage report
+        if: always()
+        run: |
+          scp testing:$TEMP_DIR/coverage-int* ./
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-integration
+          path: coverage-int.*
+
+      - name: Cleanup
+        if: always()
+        run: |
+          ssh testing << EOF
+            test -e $TEMP_DIR/.env && source $TEMP_DIR/.env && docker rm -f \$TESTOMNI
+            test -e $TEMP_DIR && rm -rf $TEMP_DIR
+          EOF

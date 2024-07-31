@@ -1,0 +1,36 @@
+repos:
+  - repo: local
+    hooks:
+      - id: go-fmt
+        name: go-fmt
+        entry: gofmt -l -w -s
+        language: system
+        types: [go]
+      - id: go-imports
+        name: go-imports
+        entry: goimports -l -w
+        language: system
+        types: [go]
+      - id: git-diff-go-files
+        name: git-diff
+        entry: git diff --exit-code
+        language: system
+        types: [go]
+        fail_fast: true
+      - id: go-mod-tidy
+        name: go-mod-tidy
+        entry: go mod tidy -v
+        language: system
+        pass_filenames: false
+      - id: git-diff-go-mod
+        name: git-diff-go-mod
+        entry: git diff --exit-code
+        language: system
+        files: 'go.(mod|sum)'
+        fail_fast: true
+      - id: golangci-lint-staged
+        name: golangci-lint-staged
+        entry: go run -tags=githooks ./.githooks/golangci-lint-staged/.
+        language: system
+        pass_filenames: false
+        always_run: true

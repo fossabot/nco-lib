@@ -1,0 +1,32 @@
+---
+name: Check code quality
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  lint:
+    uses: ./.github/workflows/lint.yml
+
+  test-unit:
+    uses: ./.github/workflows/test-unit.yml
+
+  test-integration:
+    uses: ./.github/workflows/test-integration.yml
+    secrets:
+      TESTING_SSH_USER: ${{ secrets.TESTING_SSH_USER }}
+      TESTING_SSH_KEY: ${{ secrets.TESTING_SSH_KEY }}
+      TESTING_SSH_HOST: ${{ secrets.TESTING_SSH_HOST }}
+
+  test-publish-sonar:
+    uses: ./.github/workflows/test-publish-sonar.yml
+    needs:
+      - lint
+      - test-unit
+      - test-integration
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
