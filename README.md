@@ -7,7 +7,45 @@
 
 > *"Netcool OMNIbus Object Server" - component of IBM Netcool stack, in-memory database to store alerts data*
 
-... TBD
+Repository contains some packages for working with OMNIbus Object Server.
+
+#### Package `dbconnector`
+
+Defines a DB-API interface: 'connector' and 'connection'.
+So that your application logic does not depend on a specific implementation of the DB client.
+Also contains interface mocks for testing purposes.
+
+```go
+package main
+
+import (
+  "context"
+
+  "github.com/ncotds/nco-lib/dbconnector"
+)
+
+type Pool struct {
+	Connector   dbconnector.DBConnector
+	Credentials dbconnector.Credentials
+	Addr        dbconnector.Addr
+	// ...
+}
+
+func (p *Pool) Acquire(ctx context.Context) (dbconnector.ExecutorCloser, error) {
+	// ... check if there are no idle connections, pool is not full, etc ...
+	conn, err := p.Connector.Connect(ctx, p.Addr, p.Credentials)
+	if err != nil {
+		return nil, err
+	}
+	// ... store conn in pool
+	return conn, nil
+}
+
+func (p *Pool) Release(conn dbconnector.ExecutorCloser) error {
+	// ... check conn and mark it unused ...
+	return nil
+}
+```
 
 ## Versioning
 
