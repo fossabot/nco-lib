@@ -4,6 +4,7 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ncotds_nco-lib&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ncotds_nco-lib)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ncotds_nco-lib&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ncotds_nco-lib)
 [![CI](https://github.com/ncotds/nco-lib/actions/workflows/codeql.yml/badge.svg)](https://github.com/ncotds/nco-lib/actions/workflows/codeql.yml)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fncotds%2Fnco-lib.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fncotds%2Fnco-lib?ref=badge_shield)
 
 > *"Netcool OMNIbus Object Server" - component of IBM Netcool stack, in-memory database to store alerts data*
 
@@ -123,3 +124,6 @@ Setup dev environment:
   ```
   make lint test
   ```
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fncotds%2Fnco-lib.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fncotds%2Fnco-lib?ref=badge_large)
