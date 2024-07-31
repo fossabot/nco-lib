@@ -28,8 +28,6 @@ const (
 
 var _ db.DBConnector = (*TDSConnector)(nil)
 
-var noopCancelFn = func() {}
-
 type TDSConnector struct {
 	AppLabel   string
 	TimeoutSec uint

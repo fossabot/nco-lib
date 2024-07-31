@@ -15,6 +15,12 @@ import (
 
 var _ db.ExecutorCloser = (*Connection)(nil)
 
+var noopCancelFn = func() {
+	// default 'cancel' function to Connection context, used when
+	// connection is not open yet/already closed.
+	// so, we can be sure that Connection.connCancel func always not nil
+}
+
 type Connection struct {
 	inUse      atomic.Bool
 	conn       *tds.Conn
