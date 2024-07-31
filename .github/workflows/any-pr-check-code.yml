@@ -24,9 +24,6 @@ jobs:
             tdsclient:
               - 'internal/tdsclient/**'
 
-  test-unit:
-    uses: ./.github/workflows/test-unit.yml
-
   test-integration:
     needs: changes
     if: ${{ needs.changes.outputs.tdsclient == 'true' }}
@@ -40,7 +37,6 @@ jobs:
     uses: ./.github/workflows/test-publish-gh.yml
     needs:
       - lint
-      - test-unit
       - test-integration
     if: ${{ always() }}
 
@@ -48,7 +44,6 @@ jobs:
     uses: ./.github/workflows/test-publish-sonar.yml
     needs:
       - lint
-      - test-unit
       - test-integration
     if: ${{ always() }}
     secrets:

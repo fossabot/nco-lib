@@ -11,9 +11,6 @@ jobs:
   lint:
     uses: ./.github/workflows/lint.yml
 
-  test-unit:
-    uses: ./.github/workflows/test-unit.yml
-
   test-integration:
     uses: ./.github/workflows/test-integration.yml
     secrets:
@@ -25,7 +22,6 @@ jobs:
     uses: ./.github/workflows/test-publish-sonar.yml
     needs:
       - lint
-      - test-unit
       - test-integration
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

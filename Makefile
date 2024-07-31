@@ -14,7 +14,7 @@ setup-tools:
 test: test-int
 
 .PHONY: test-int
-#? test-unit: Run the integration tests
+#? test-int: Run the integration tests
 test-int:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) gotestsum --junitfile=coverage-int.xml --jsonfile=coverage-int.json -- \
  		-tags=integration -coverprofile=coverage-int.txt -covermode atomic -race ./tdsclient/.
