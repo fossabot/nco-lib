@@ -47,6 +47,53 @@ func (p *Pool) Release(conn dbconnector.ExecutorCloser) error {
 }
 ```
 
+#### Package `tdsclient`
+
+Pure Go implementation of `dbconnector` interfaces.
+
+Usage example:
+```go
+package main
+
+import (
+  "context"
+  "errors"
+  "fmt"
+  "log"
+
+  db "github.com/ncotds/nco-lib/dbconnector"
+  tds "github.com/ncotds/nco-lib/tdsclient"
+)
+
+func main() {
+  connector := &tds.TDSConnector{}
+
+  conn, err := connector.Connect(
+    context.Background(),
+    "localhost:4100",
+    db.Credentials{UserName: "user", Password: "passwd"},
+  )
+  if err != nil {
+    log.Fatalf("cannot connect db, %v", err)
+  }
+
+  rows, affected, err := conn.Exec(
+    context.Background(),
+    db.Query{SQL: "describe alerts.status"},
+  )
+  if errors.Is(err, db.ErrConnectionFailed) {
+    log.Fatalf("db connection failed, %v", err)
+  }
+  if err != nil {
+    log.Fatalf("query failed, %v", err)
+  }
+
+  fmt.Println("affected rows:", affected)
+  fmt.Println("result rows:", rows)
+}
+
+```
+
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning.
